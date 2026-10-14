@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#4CAF50" />
+  <meta name="description" content="CareQuest Glucose Log" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="img/IMG-20261014-WA0009.jpg" />
+  <title>CareQuest Glucose Log</title>
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --primary-dark: #388E3C;
+      --accent: #FF9800;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #333333;
+      --muted: #777777;
+      --danger: #E53935;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    header p {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .cover {
+      width: 100%;
+      max-height: 720px;
+      object-fit: scale-downs;
+      display: block;
+    }
+
+    main {
+      padding: 1rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--primary-dark);
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+      color: var(--text);
+    }
+
+    input[type="date"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+      background: white;
+    }
+
+    input[type="date"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: -0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.875rem;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button.secondary {
+      background: #e0e0e0;
+      color: var(--text);
+      margin-top: 0.5rem;
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      text-align: center;
+    }
+
+    .summary div {
+      background: #f0f8f0;
+      border-radius: 12px;
+      padding: 0.75rem;
+    }
+
+    .summary strong {
+      display: block;
+      font-size: 1.25rem;
+      color: var(--primary-dark);
+    }
+
+    .summary span {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.875rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .entry:last-child {
+      border-bottom: none;
+    }
+
+    .entry-date {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .entry-readings {
+      text-align: right;
+    }
+
+    .entry-readings span {
+      display: block;
+      font-size: 0.875rem;
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      background: #e8f5e9;
+      color: var(--primary-dark);
+      margin-right: 0.25rem;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+
+    .reference-img {
+      width: 100%;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+      display: block;
+    }
+
+    .caption {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      background: #323232;
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 360px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+      .summary {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Health Quest</h1>
+    <p>Daily Glucose Tracker</p>
+  </header>
+
+  <img src="img/IMG-20261014-WA0009.jpg" alt="CareQuest cover" class="cover" />
+
+  <main>
+    <section class="card">
+      <h2>Log Today</h2>
+      <label for="date">Date</label>
+      <input type="date" id="date" />
+
+      <label for="unit">Units</label>
+      <select id="unit">
+        <option value="mmol">mmol/L</option>
+        <option value="mgdl">mg/dL</option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label for="morning">Fasting / Morning</label>
+          <input type="number" id="morning" inputmode="decimal" step="0.1" min="0" placeholder="e.g. 5.6" />
+        </div>
+        <div>
+          <label for="evening">Post-meal / Evening</label>
+          <input type="number" id="evening" inputmode="decimal" step="0.1" min="0" placeholder="e.g. 7.2" />
+        </div>
+      </div>
+      <p class="hint" id="unitHint">Values are saved and displayed in mmol/L. Switch units anytime.</p>
+
+      <button id="saveBtn" type="button">Save Reading</button>
+      <button id="exportBtn" type="button" class="secondary">Share / Export Data</button>
+    </section>
+
+    <section class="card">
+      <h2>7-Day Summary</h2>
+      <div class="summary" id="summary">
+        <div>
+          <strong id="avgMorning">-</strong>
+          <span>Morning avg</span>
+        </div>
+        <div>
+          <strong id="avgEvening">-</strong>
+          <span>Evening avg</span>
+        </div>
+        <div>
+          <strong id="totalEntries">0</strong>
+          <span>Entries</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="rewardCard">
+      <h2>Your Money Tree</h2>
+      <img id="rewardImg" class="reference-img" alt="Money tree reward" src="img/money01.png" />
+      <p class="caption" id="rewardCaption"></p>
+      <br/>
+      <h3>Exchange a prize when you have 7 coins.</h3>
+    </section>
+
+    <section class="card">
+      <h2>History</h2>
+      <div id="historyList"></div>
+      <button id="clearBtn" type="button" class="secondary danger">Clear All History</button>
+    </section>
+
+    <section class="card">
+      <h2>Reference Chart</h2>
+      <img src="img/images2.jpg" alt="Blood sugar reference chart" class="reference-img" />
+      <p class="caption">Always follow your healthcare professional's advice.</p>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'carequest_glucose_v2';
+    const UNIT_KEY = 'carequest_unit_v1';
+    const MMOL_TO_MGDL = 18;
+
+    const dateInput = document.getElementById('date');
+    const unitSelect = document.getElementById('unit');
+    const unitHint = document.getElementById('unitHint');
+    const morningInput = document.getElementById('morning');
+    const eveningInput = document.getElementById('evening');
+    const saveBtn = document.getElementById('saveBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const historyList = document.getElementById('historyList');
+    const avgMorningEl = document.getElementById('avgMorning');
+    const avgEveningEl = document.getElementById('avgEvening');
+    const totalEntriesEl = document.getElementById('totalEntries');
+    const toastEl = document.getElementById('toast');
+    const rewardImg = document.getElementById('rewardImg');
+    const rewardCaption = document.getElementById('rewardCaption');
+
+    function getReadings() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function setReadings(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function getUnit() {
+      return localStorage.getItem(UNIT_KEY) || 'mmol';
+    }
+
+    function setUnit(unit) {
+      localStorage.setItem(UNIT_KEY, unit);
+    }
+
+    function unitLabel() {
+      return getUnit() === 'mgdl' ? 'mg/dL' : 'mmol/L';
+    }
+
+    // Convert mmol/L (stored value) to current display unit
+    function toDisplay(mmol) {
+      if (mmol == null) return null;
+      const val = getUnit() === 'mgdl' ? mmol * MMOL_TO_MGDL : mmol;
+      return parseFloat(val.toFixed(1));
+    }
+
+    // Convert current display unit value to mmol/L for storage
+    function toStored(display) {
+      if (display == null) return null;
+      const val = getUnit() === 'mgdl' ? display / MMOL_TO_MGDL : display;
+      return parseFloat(val.toFixed(2));
+    }
+
+    function todayLocalDate() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      return now.toISOString().split('T')[0];
+    }
+
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      setTimeout(() => toastEl.classList.remove('show'), 2500);
+    }
+
+    function formatDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+      });
+    }
+
+    function average(arr) {
+      if (!arr.length) return null;
+      return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1);
+    }
+
+    function validateInput(value) {
+      if (value.trim() === '') return null;
+      const num = parseFloat(value);
+      if (isNaN(num) || num < 0) return false;
+      // 50 mmol/L ~ 900 mg/dL, absolute safe upper bound
+      if (num > (getUnit() === 'mgdl' ? 900 : 50)) return false;
+      return num;
+    }
+
+    function updateUnitUI() {
+      const label = unitLabel();
+      unitHint.textContent = `Values are saved internally as mmol/L. Currently showing ${label}.`;
+      morningInput.placeholder = getUnit() === 'mgdl' ? 'e.g. 100' : 'e.g. 5.6';
+      eveningInput.placeholder = getUnit() === 'mgdl' ? 'e.g. 130' : 'e.g. 7.2';
+      unitSelect.value = getUnit();
+    }
+
+    function loadExisting() {
+      const readings = getReadings();
+      const today = dateInput.value;
+      if (readings[today]) {
+        morningInput.value = readings[today].morning != null ? toDisplay(readings[today].morning) : '';
+        eveningInput.value = readings[today].evening != null ? toDisplay(readings[today].evening) : '';
+      } else {
+        morningInput.value = '';
+        eveningInput.value = '';
+      }
+    }
+
+    function render() {
+      const readings = getReadings();
+      const dates = Object.keys(readings).sort((a, b) => new Date(b) - new Date(a));
+      const label = unitLabel();
+
+      // Money tree reward: money01 for 1 day ... money07 for 7+ days.
+      // At 0 entries, show money01 as the seed state with a prompt.
+      const dayCount = dates.length;
+      const level = dayCount === 0 ? 1 : Math.min(dayCount, 7);
+      rewardImg.src = 'img/money0' + level + '.png';
+      if (dayCount === 0) {
+        rewardCaption.textContent = 'Log your first reading to start growing your money tree.';
+      } else if (dayCount < 7) {
+        rewardCaption.textContent = `Day ${dayCount} — keep it up!`;
+      } else {
+        rewardCaption.textContent = `Day ${dayCount} — your money tree is in full bloom!`;
+      }
+
+      historyList.innerHTML = '';
+      if (dates.length === 0) {
+        historyList.innerHTML = '<div class="empty">No readings yet. Start by logging today.</div>';
+      } else {
+        dates.forEach(date => {
+          const r = readings[date];
+          const div = document.createElement('div');
+          div.className = 'entry';
+          div.innerHTML = `
+            <div class="entry-date">${formatDate(date)}</div>
+            <div class="entry-readings">
+              <span>${r.morning != null ? `<span class="pill">AM</span>${toDisplay(r.morning)} ${label}` : '<span class="pill">AM</span>-'}</span>
+              <span>${r.evening != null ? `<span class="pill">PM</span>${toDisplay(r.evening)} ${label}` : '<span class="pill">PM</span>-'}</span>
+            </div>
+          `;
+          historyList.appendChild(div);
+        });
+      }
+
+      const last7 = dates.slice(0, 7);
+      const morning7 = last7.map(d => readings[d].morning).filter(v => v != null).map(Number);
+      const evening7 = last7.map(d => readings[d].evening).filter(v => v != null).map(Number);
+
+      // Convert averages to display unit for consistency with input/history
+      const morningAvg = average(morning7);
+      const eveningAvg = average(evening7);
+      avgMorningEl.textContent = morningAvg != null ? toDisplay(parseFloat(morningAvg)) : '-';
+      avgEveningEl.textContent = eveningAvg != null ? toDisplay(parseFloat(eveningAvg)) : '-';
+      totalEntriesEl.textContent = dates.length;
+    }
+
+    saveBtn.addEventListener('click', () => {
+      const date = dateInput.value;
+      if (!date) {
+        showToast('Please pick a date');
+        return;
+      }
+
+      const morningRaw = validateInput(morningInput.value);
+      const eveningRaw = validateInput(eveningInput.value);
+
+      if (morningRaw === false || eveningRaw === false) {
+        showToast('Please enter a realistic glucose value');
+        return;
+      }
+
+      if (morningRaw === null && eveningRaw === null) {
+        showToast('Enter at least one reading');
+        return;
+      }
+
+      const morning = morningRaw !== null ? toStored(morningRaw) : null;
+      const evening = eveningRaw !== null ? toStored(eveningRaw) : null;
+
+      const readings = getReadings();
+      readings[date] = { morning, evening };
+      setReadings(readings);
+      render();
+      showToast('Saved for ' + formatDate(date));
+    });
+
+    unitSelect.addEventListener('change', () => {
+      setUnit(unitSelect.value);
+      updateUnitUI();
+      loadExisting();
+      render();
+    });
+
+    exportBtn.addEventListener('click', async () => {
+      const readings = getReadings();
+      const dates = Object.keys(readings).sort();
+      if (dates.length === 0) {
+        showToast('No data to export');
+        return;
+      }
+      const rows = ['Date,Morning (mmol/L),Evening (mmol/L)'];
+      dates.forEach(d => {
+        const r = readings[d];
+        rows.push(`${d},${r.morning ?? ''},${r.evening ?? ''}`);
+      });
+      const csv = rows.join('\n');
+
+      if (navigator.share) {
+        const file = new File([csv], 'glucose-log.csv', { type: 'text/csv' });
+        try {
+          await navigator.share({
+            title: 'CareQuest Glucose Log',
+            text: 'My glucose readings',
+            files: [file]
+          });
+          return;
+        } catch (e) {
+          // fall through to download
+        }
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'glucose-log.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('CSV downloaded');
+    });
+
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Delete all saved glucose readings? This cannot be undone.')) {
+        localStorage.removeItem(STORAGE_KEY);
+        morningInput.value = '';
+        eveningInput.value = '';
+        render();
+        showToast('History cleared');
+      }
+    });
+
+    dateInput.addEventListener('change', loadExisting);
+
+    dateInput.value = todayLocalDate();
+    updateUnitUI();
+    loadExisting();
+    render();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
