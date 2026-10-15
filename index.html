@@ -6,7 +6,8 @@
   <meta name="theme-color" content="#4CAF50" />
   <meta name="description" content="CareQuest Glucose Log" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="img/IMG-20261014-WA0009.jpg" />
+  <link rel="icon" type="image/png" href="img/exercising.png" />
+  <link rel="apple-touch-icon" href="img/exercising.png" />
   <title>CareQuest Glucose Log</title>
   <style>
     :root {
@@ -662,7 +663,10 @@
       const quoteAuthor = document.getElementById('quoteAuthor');
       const quoteLoading = document.getElementById('quoteLoading');
       try {
-        const res = await fetch('https://zenquotes.io/api/today');
+        // zenquotes.io doesn't send CORS headers, so route through a CORS proxy
+        // to get a readable response. (no-cors would return an opaque response
+        // that can't be read.)
+        const res = await fetch('https://corsproxy.io/?url=' + encodeURIComponent('https://zenquotes.io/api/today'));
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const q = Array.isArray(data) ? data[0] : data;

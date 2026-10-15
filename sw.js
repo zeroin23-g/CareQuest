@@ -5,6 +5,7 @@ const ASSETS = [
   './manifest.json',
   './img/IMG-20261014-WA0009.jpg',
   './img/images2.jpg',
+  './img/exercising.png',
   './img/money01.png',
   './img/money02.png',
   './img/money03.png',
