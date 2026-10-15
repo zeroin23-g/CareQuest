@@ -143,8 +143,42 @@
       margin-top: 0.5rem;
     }
 
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .button-row button {
+      margin-top: 0;
+    }
+
     button.danger {
       background: var(--danger);
+    }
+
+    .quote-card {
+      background: linear-gradient(135deg, #fff8e1, #fff3c4);
+      border-left: 4px solid var(--accent);
+    }
+
+    .quote-text {
+      font-size: 1rem;
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .quote-author {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .quote-loading {
+      font-size: 0.9rem;
+      color: var(--muted);
     }
 
     .summary {
@@ -291,7 +325,17 @@
       <p class="hint" id="unitHint">Values are saved and displayed in mmol/L. Switch units anytime.</p>
 
       <button id="saveBtn" type="button">Save Reading</button>
-      <button id="exportBtn" type="button" class="secondary">Share / Export Data</button>
+      <div class="button-row">
+        <button id="downloadBtn" type="button" class="secondary">Download CSV</button>
+        <button id="copyBtn" type="button" class="secondary">Copy CSV</button>
+      </div>
+    </section>
+
+    <section class="card quote-card">
+      <h2>Quote of the Day</h2>
+      <p class="quote-loading" id="quoteLoading">Loading quote…</p>
+      <blockquote class="quote-text" id="quoteText" style="display:none;"></blockquote>
+      <p class="quote-author" id="quoteAuthor" style="display:none;"></p>
     </section>
 
     <section class="card">
@@ -346,7 +390,8 @@
     const morningInput = document.getElementById('morning');
     const eveningInput = document.getElementById('evening');
     const saveBtn = document.getElementById('saveBtn');
-    const exportBtn = document.getElementById('exportBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyBtn');
     const clearBtn = document.getElementById('clearBtn');
     const historyList = document.getElementById('historyList');
     const avgMorningEl = document.getElementById('avgMorning');
@@ -533,34 +578,24 @@
       render();
     });
 
-    exportBtn.addEventListener('click', async () => {
+    function buildCsv() {
       const readings = getReadings();
       const dates = Object.keys(readings).sort();
-      if (dates.length === 0) {
-        showToast('No data to export');
-        return;
-      }
+      if (dates.length === 0) return null;
       const rows = ['Date,Morning (mmol/L),Evening (mmol/L)'];
       dates.forEach(d => {
         const r = readings[d];
         rows.push(`${d},${r.morning ?? ''},${r.evening ?? ''}`);
       });
-      const csv = rows.join('\n');
+      return rows.join('\n');
+    }
 
-      if (navigator.share) {
-        const file = new File([csv], 'glucose-log.csv', { type: 'text/csv' });
-        try {
-          await navigator.share({
-            title: 'CareQuest Glucose Log',
-            text: 'My glucose readings',
-            files: [file]
-          });
-          return;
-        } catch (e) {
-          // fall through to download
-        }
+    function downloadCsv() {
+      const csv = buildCsv();
+      if (!csv) {
+        showToast('No data to export');
+        return;
       }
-
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -571,7 +606,38 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showToast('CSV downloaded');
-    });
+    }
+
+    async function copyCsv() {
+      const csv = buildCsv();
+      if (!csv) {
+        showToast('No data to export');
+        return;
+      }
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(csv);
+        } else {
+          // Fallback for non-secure contexts (plain HTTP).
+          const ta = document.createElement('textarea');
+          ta.value = csv;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          if (!ok) throw new Error('copy failed');
+        }
+        showToast('CSV copied to clipboard');
+      } catch (e) {
+        showToast('Copy failed — try Download instead');
+      }
+    }
+
+    downloadBtn.addEventListener('click', downloadCsv);
+    copyBtn.addEventListener('click', copyCsv);
 
     clearBtn.addEventListener('click', () => {
       if (confirm('Delete all saved glucose readings? This cannot be undone.')) {
@@ -589,6 +655,26 @@
     updateUnitUI();
     loadExisting();
     render();
+
+    // Quote of the day from zenquotes.io
+    (async function loadQuote() {
+      const quoteText = document.getElementById('quoteText');
+      const quoteAuthor = document.getElementById('quoteAuthor');
+      const quoteLoading = document.getElementById('quoteLoading');
+      try {
+        const res = await fetch('https://zenquotes.io/api/today');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const q = Array.isArray(data) ? data[0] : data;
+        quoteText.textContent = '"' + q.q + '"';
+        quoteAuthor.textContent = '— ' + q.a;
+        quoteLoading.style.display = 'none';
+        quoteText.style.display = 'block';
+        quoteAuthor.style.display = 'block';
+      } catch (e) {
+        quoteLoading.textContent = 'Stay positive — every day is a new start.';
+      }
+    })();
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
