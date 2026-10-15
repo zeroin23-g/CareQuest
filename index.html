@@ -8,6 +8,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" href="img/exercising.png" />
   <link rel="apple-touch-icon" href="img/exercising.png" />
+  <script src="https://unpkg.com/corsfix"></script>
   <title>CareQuest Glucose Log</title>
   <style>
     :root {
@@ -374,7 +375,30 @@
     <section class="card">
       <h2>Reference Chart</h2>
       <img src="img/images2.jpg" alt="Blood sugar reference chart" class="reference-img" />
-      <p class="caption">Always follow your healthcare professional's advice.</p>
+      <p class="caption">Always follow your healthcare professional's advice.</p><br/><br/>
+      <button id="comingSoonBtn" type="button">Coming Soon (More Rewards)</button>
+    </section>
+
+    <section class="card">
+      <h2>Personal Agentic Health Assistant Butler</h2>
+      <p class="caption"> is an autonomous, AI-driven digital companion that continuously monitors, analyzes, and manages your daily health, wellness, and medical routines.</p>
+      <p class="caption"> 
+<br/><br/>
+<b>What It Does</b>
+<br/><br/>
+• Continuous Monitoring: Connects to wearable devices, sleep trackers, and smart scales to track real-time biometrics and time-series health data.
+• Proactive Orchestration: Flags missed check-ups, unfinished lab work, or irregular sleep patterns without needing manual prompts.
+• Multi-Agent Specialization: Operates using specialized sub-agents—such as a Data Science agent for trend analysis, a Domain Expert agent for medical facts, and a Health Coach agent for behavioral motivation.
+• Local & Enterprise Ecosystems: In Singapore, public healthcare systems use platforms like Synapxe AgentSea to build personalized workflows, while consumer tools like One Medical Health AI integrate patient data with clinical guidance.
+<br/><br/>
+<b>Key Capabilities</b>
+<br/><br/>
+• Calendar & Routine Sync: Coordinates medication reminders, doctor appointments, and workout targets with your daily schedule.
+• Data Privacy & Memory: Stores personal health logs safely while filtering out sensitive identifiers like NRIC or credit card data.
+• Automated Nudges: Translates complex health reports into actionable daily tasks or calendar blocks.
+<br/><br/>
+
+    </p>    
     </section>
   </main>
 
@@ -650,6 +674,10 @@
       }
     });
 
+    document.getElementById('comingSoonBtn').addEventListener('click', () => {
+      window.open('https://www.onlinegames.io/merge-pixel/', '_blank');
+    });
+
     dateInput.addEventListener('change', loadExisting);
 
     dateInput.value = todayLocalDate();
@@ -663,10 +691,9 @@
       const quoteAuthor = document.getElementById('quoteAuthor');
       const quoteLoading = document.getElementById('quoteLoading');
       try {
-        // zenquotes.io doesn't send CORS headers, so route through a CORS proxy
-        // to get a readable response. (no-cors would return an opaque response
-        // that can't be read.)
-        const res = await fetch('https://corsproxy.io/?url=' + encodeURIComponent('https://zenquotes.io/api/today'));
+        // zenquotes.io doesn't send CORS headers, so use corsfix
+        // to obtain a readable cross-origin response.
+        const res = await corsfix.fetch('https://zenquotes.io/api/today');
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const q = Array.isArray(data) ? data[0] : data;
